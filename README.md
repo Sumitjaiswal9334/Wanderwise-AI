@@ -1,219 +1,366 @@
-# Wanderwise AI Travel Planner
+# ✈️ Wanderwise AI — Intelligent Travel Planner
 
-Wanderwise AI is a Streamlit travel-planning assistant. Describe a trip in
-natural language and it can search live flight and hotel options, keep context
-for follow-up questions, generate a day-by-day itinerary, estimate a budget,
-create a PDF report and optionally email the report after explicit approval.
+**Plan smarter. Travel better. Explore more.**
 
-The application uses Google Gemini through LangChain for the assistant and
-itinerary generation, SerpApi for Google Flights and Google Hotels search,
-SQLite for conversation checkpoints, ReportLab for PDF generation and SendGrid
-for optional email delivery.
+Wanderwise AI is an AI-powered travel planning assistant built with **Streamlit, LangGraph, Google Gemini, and SerpApi**. It transforms natural-language travel requests into structured flight and hotel comparisons, personalized day-by-day itineraries, and transparent trip budget estimates.
 
-## Features
+With conversational memory, downloadable PDF reports, and optional email delivery, Wanderwise AI brings the essential steps of travel planning together in one interactive application.
 
-- Natural-language trip requests.
-- Live flight search through SerpApi Google Flights.
-- Live hotel search through SerpApi Google Hotels.
-- Structured result cards with prices, routes, dates, durations, stops,
-  ratings, amenities and provider links when returned by the provider.
-- Sorting for flight price, duration and stops, and hotel prices and ratings.
-- Follow-up questions within the same trip conversation.
-- New-trip control for starting a fresh conversation thread.
-- AI-generated day-by-day itinerary with a transparent INR budget estimate.
-- PDF trip report containing the request, search results, itinerary and budget.
-- TXT summary download.
-- Optional PDF email delivery through SendGrid after the user approves sending.
-- Responsive custom Streamlit UI with the default Streamlit navigation hidden.
+> **Note:** Wanderwise AI helps you search and plan. It does not book flights, reserve hotels, or process payments.
 
-## Project structure
+---
 
-```text
-.
-├── frontend.py                 # Streamlit UI and application entry point
-├── app/
-│   ├── agent.py                # Gemini agent and LangGraph execution
-│   ├── email_service.py        # Optional SendGrid email delivery
-│   ├── memory.py               # SQLite LangGraph checkpoint storage
-│   ├── pdf_service.py          # PDF report generation
-│   ├── schemas.py              # Validated flight, hotel and plan models
-│   ├── tools.py                # SerpApi flight and hotel search tools
-│   └── trip_planner.py         # Itinerary generation and budget estimates
-├── requirements.txt
-├── .env                       # Local secrets and configuration; do not commit
-└── travel_memory.sqlite3       # Local conversation memory; ignored by Git
+## ✨ Features
+
+### 🔎 Flight & Hotel Discovery
+- Search flight options using SerpApi's Google Flights results.
+- Discover hotels using Google Hotels search results.
+- Display structured flight and hotel cards with available prices, dates, durations, stops, ratings, amenities, and provider links.
+- Sort flight options by price, duration, and number of stops.
+- Sort hotel options by price and guest rating.
+- Handle missing provider data without fabricating prices, ratings, or availability.
+
+### 🗺️ AI-Powered Trip Planning
+- Generate personalized, day-by-day travel itineraries.
+- Organize activities into morning, afternoon, and evening schedules.
+- Estimate accommodation, transportation, food, activities, and contingency expenses.
+- Compare the estimated trip cost against the user's budget.
+- Use Gemini for itinerary generation, with a fallback when AI generation is unavailable.
+
+### 💬 Conversational Memory
+- Ask follow-up questions without repeating the entire trip request.
+- Maintain conversation context using LangGraph checkpoints.
+- Persist conversation state in SQLite.
+- Start a fresh planning session using the **New Trip** control.
+
+### 📄 PDF Reports & Email Delivery
+- Generate downloadable PDF travel reports.
+- Include trip details, flight and hotel results, itinerary, and budget estimates.
+- Download a plain-text trip summary.
+- Preview the email workflow and approve delivery explicitly.
+- Send the PDF report using SendGrid when email credentials are configured.
+
+### 🛡️ Reliability & Security
+- Validate structured results with Pydantic.
+- Keep API credentials in environment variables.
+- Handle missing data and external API errors.
+- Separate AI-generated suggestions from provider-sourced travel information.
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+|---|---|
+| Frontend | Streamlit |
+| AI assistant | Google Gemini |
+| Agent orchestration | LangGraph |
+| LLM integration | LangChain Google GenAI |
+| Flight search | SerpApi — Google Flights |
+| Hotel search | SerpApi — Google Hotels |
+| Data validation | Pydantic |
+| Conversation persistence | SQLite + LangGraph Checkpointer |
+| PDF generation | ReportLab |
+| Email delivery | SendGrid |
+| Configuration | Python Dotenv |
+| Testing | Pytest |
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart TD
+    A[User Request] --> B[Streamlit Frontend]
+    B --> C[LangGraph AI Agent]
+    C --> D[Google Gemini]
+    C --> E[Flight Search Tool]
+    C --> F[Hotel Search Tool]
+    E --> G[SerpApi]
+    F --> G
+    G --> H[Validated Structured Results]
+    H --> I[Flight and Hotel Cards]
+    I --> J[Itinerary and Budget Planner]
+    J --> K[Trip Summary]
+    C <--> L[(SQLite Conversation Memory)]
+    K --> M[PDF Export]
+    K --> N[Email Preview and Approval]
+    N --> O[SendGrid]
 ```
 
-## Requirements
+### How it works
+
+1. The user describes a trip using natural language.
+2. The LangGraph agent interprets the request and invokes relevant search tools.
+3. SerpApi retrieves available flight and hotel search results.
+4. Results are normalized and validated before being displayed.
+5. The user reviews options and generates a trip itinerary with estimated costs.
+6. LangGraph checkpoints preserve conversation context for follow-up questions.
+7. The user downloads a PDF report or approves sending it by email.
+
+---
+
+## 📁 Project Structure
+
+```text
+Wanderwise-AI/
+│
+├── frontend.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+│
+├── app/
+│   ├── agent.py
+│   ├── tools.py
+│   ├── schemas.py
+│   ├── trip_planner.py
+│   ├── memory.py
+│   ├── pdf_service.py
+│   └── email_service.py
+│
+└── travel_memory.sqlite3   # Generated locally
+```
+
+**Module responsibilities**
+
+- `frontend.py` — Streamlit interface and user interactions.
+- `app/agent.py` — Gemini integration and LangGraph agent execution.
+- `app/tools.py` — Flight and hotel search integrations.
+- `app/schemas.py` — Validated data models.
+- `app/trip_planner.py` — Itinerary generation and budget calculations.
+- `app/memory.py` — SQLite-backed conversation checkpoints.
+- `app/pdf_service.py` — PDF report generation.
+- `app/email_service.py` — Optional SendGrid email delivery.
+
+The SQLite database and generated reports are runtime artifacts and should not be committed to Git.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 
 - Python 3.11 or 3.12
 - A Google Gemini API key
-- A SerpApi API key for live flight and hotel results
-- A SendGrid API key and verified sender address only if email delivery is
-  needed
+- A SerpApi API key for flight and hotel searches
+- A SendGrid API key and verified sender address for email delivery (optional)
+- Git, if cloning the repository
 
-## Windows setup
+### 1. Clone the repository
 
-Open PowerShell in the project folder:
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd <YOUR_PROJECT_FOLDER>
+```
+
+Alternatively, download the project ZIP and extract it locally.
+
+### 2. Create a virtual environment
+
+**Windows — PowerShell**
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, use Command Prompt:
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+**macOS / Linux**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If PowerShell blocks script activation, either allow local scripts for the
-current user or run the environment's Python directly:
+### 4. Configure environment variables
 
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-.\.venv\Scripts\Activate.ps1
-```
-
-## Environment variables
-
-Create a `.env` file in the project root. Do not paste real keys into the
-README, commit them, or share them publicly.
+Create a `.env` file in the project root. If `.env.example` exists, copy it and fill in your credentials.
 
 ```dotenv
-# Required for the Gemini travel assistant
+# Google Gemini
 Google_API_KEY=your_gemini_api_key
 Google_MODEL=gemini-3.5-flash-lite
 
-# Required for live flight and hotel search
+# SerpApi
 SERPAPI_API_KEY=your_serpapi_api_key
 
-# Optional: enable the email report feature
+# Optional: SendGrid email delivery
 SENDGRID_API_KEY=
 FROM_EMAIL=
 
-# Optional: change the SQLite checkpoint location
+# Optional: SQLite checkpoint database
 TRAVEL_MEMORY_DB=travel_memory.sqlite3
 ```
 
-`Google_MODEL` can be changed to another Gemini model available to your API
-account. The assistant reads `Google_API_KEY` for chat responses. The
-itinerary module currently checks `GOOGLE_API_KEY` as well, so set the same
-Gemini key under both names if itinerary generation falls back to the
-template instead of using Gemini:
+**Important:** The itinerary module may also require `GOOGLE_API_KEY`. If so, configure the same Gemini key under both variable names:
 
 ```dotenv
 GOOGLE_API_KEY=your_gemini_api_key
 ```
 
-The email feature also requires a verified `FROM_EMAIL` sender in SendGrid.
-Leave both SendGrid variables empty if email delivery is not required.
+Use the exact variable names expected by your code. The model name above is configurable; choose a model currently available to your Gemini API account.
 
-## Run the app
+Never commit your real `.env` file or publish API credentials.
 
-Start Streamlit from the project root:
+### 5. Run the application
 
-```powershell
+From the project root:
+
+```bash
 streamlit run frontend.py
 ```
 
-Then open the local URL shown by Streamlit, normally
-`http://localhost:8501`.
+Open the local URL displayed in the terminal, usually:
 
-## Example requests
+**http://localhost:8501**
+
+---
+
+## 💡 Example Usage
+
+### Example 1 — Flight and hotel search
 
 ```text
-Find flights from DEL to BOM on 2026-11-15, returning 2026-11-20,
-for 1 adult. Find hotels in Mumbai too.
+Find flights from DEL to BOM on 2026-11-15,
+returning on 2026-11-20, for 1 adult.
+Find 4-star hotels in Mumbai for the same dates.
 ```
+
+### Example 2 — International trip
 
 ```text
-Find nonstop flights from DEL to DXB on 2026-12-10 for 2 adults.
-Also find 4-star hotels in Dubai from 2026-12-10 to 2026-12-14.
+Find nonstop flights from DEL to DXB on 2026-12-10
+for 2 adults.
+
+Find 4-star hotels in Dubai from 2026-12-10
+to 2026-12-14.
 ```
 
-For the best results, include:
+### Example 3 — Budget-aware itinerary
 
-- IATA airport codes for flights, such as `DEL` and `BOM`.
-- Dates in `YYYY-MM-DD` format.
-- Number of adults, children or infants when relevant.
-- Hotel destination, check-in/check-out dates and preferred hotel class.
-- Budget or travel preferences when requesting an itinerary.
+```text
+Plan a 5-day Mumbai trip for one adult with a total
+budget of ₹30,000, including return flights and a hotel.
 
-## How the application works
-
-1. `frontend.py` loads `.env` and collects the user's trip request.
-2. The Gemini agent decides whether flight or hotel search tools are needed.
-3. `app/tools.py` calls SerpApi and normalizes provider responses into
-   validated Pydantic models.
-4. LangGraph stores the conversation using the trip's thread ID in SQLite.
-5. The UI displays structured results and lets the user select flight/hotel
-   options for itinerary planning.
-6. The itinerary module uses Gemini when available and has a generic fallback
-   template if generation fails.
-7. The selected results and itinerary can be exported as a PDF or sent through
-   SendGrid after approval.
-
-## Memory and generated files
-
-Each browser session starts with a trip thread ID. Clicking **New trip**
-creates a new thread and clears the current UI selections. LangGraph
-checkpoints are stored in `travel_memory.sqlite3` by default.
-
-Change the location with `TRAVEL_MEMORY_DB` when needed:
-
-```dotenv
-TRAVEL_MEMORY_DB=C:\path\to\travel_memory.sqlite3
+Compare available flight and hotel options, recommend
+a suitable combination, generate a day-wise itinerary,
+and estimate the total trip cost.
 ```
 
-The database and generated PDFs are ignored by Git. Keep the database private
-because it may contain travel conversation data.
+### Example 4 — Follow-up conversation
 
-## Important limitations
+After generating a trip plan, ask:
 
-- The app searches and plans; it does not book, reserve or pay for travel.
-- Prices, availability, ratings, links, baggage rules and cancellation terms
-  can change. Verify all final details with the provider.
-- Missing provider data is shown as unavailable rather than invented.
-- Food, transport, activities and contingency amounts are rough INR planning
-  estimates, not live quotes.
-- AI itineraries are suggestions. Confirm opening hours, travel times and
-  reservations independently.
-- SendGrid accepting a message does not guarantee inbox delivery.
-- The default SQLite checkpoint setup is intended for a local or single-instance
-  deployment. Add authentication, user ownership and production storage before
-  exposing the app to multiple users.
-
-## Troubleshooting
-
-### `Google API key missing`
-
-Check that `Google_API_KEY` is present in `.env`, contains a valid Gemini key,
-and restart Streamlit after changing the file. For Gemini-powered itinerary
-generation, also set `GOOGLE_API_KEY` as described above.
-
-### `SERPAPI_API_KEY is missing`
-
-Add a valid SerpApi key to `.env` and restart the app. Check the SerpApi quota
-and use valid airport codes and dates.
-
-### Itinerary uses the fallback template
-
-Verify the Gemini key variable names, selected model and API quota. The app
-intentionally returns a generic itinerary when Gemini generation fails.
-
-### Email is not sent
-
-Set `SENDGRID_API_KEY` and a verified `FROM_EMAIL`. Confirm that the SendGrid
-API key has mail-send permission and that the sender identity is verified.
-
-### SQLite checkpoint dependency error
-
-Reinstall dependencies inside the active virtual environment:
-
-```powershell
-pip install -r requirements.txt
+```text
+Keep the same travel dates, but reduce my hotel budget
+to ₹3,000 per night. Recalculate the total and update
+the itinerary without changing the return flight date.
 ```
 
-## Security
+The assistant is designed to use the existing trip context when handling follow-up requests.
 
-- Never commit `.env`, API keys, `travel_memory.sqlite3` or generated reports.
-- Rotate any API key that was accidentally exposed.
-- Treat provider links and prices as untrusted external data and verify them
-  before booking.
+---
+
+## 🧪 Testing
+
+Run the automated tests from the project root:
+
+```bash
+pytest -q
+```
+
+For additional debugging output:
+
+```bash
+pytest -v
+```
+
+Test coverage should include:
+
+- Flight and hotel result normalization.
+- Sorting and missing-data handling.
+- Budget calculations and itinerary date validation.
+- Conversation persistence and new-trip isolation.
+- PDF generation and download.
+- Email approval, attachment handling, and error cases.
+
+Tests that do not require live provider data should use mocked API responses to avoid unnecessary API usage.
+
+---
+
+## ⚙️ Configuration & Cost Optimization
+
+Wanderwise AI integrates external APIs, so actual costs and limits depend on the provider accounts and selected models.
+
+- Reuse search results where safe instead of repeating identical API requests.
+- Keep prompts focused to reduce unnecessary token usage.
+- Use deterministic Python functions for sorting and budget calculations.
+- Monitor Gemini quotas and SerpApi search limits.
+- Leave SendGrid credentials unset when email delivery is not required.
+- Use a supported Gemini model configured for your API account.
+
+Free-tier access, model availability, and quotas may change. Check the relevant providers' current documentation before deployment.
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem | What to check |
+|---|---|
+| Gemini API key missing | Check `.env` variable names and restart Streamlit. |
+| Flight or hotel results unavailable | Verify `SERPAPI_API_KEY`, search parameters, and remaining quota. |
+| Itinerary falls back to a template | Check Gemini credentials, model availability, quota, and application logs. |
+| Conversation context is lost | Check thread ID reuse, checkpointer configuration, and SQLite persistence. |
+| PDF generation fails | Verify ReportLab installation and inspect the traceback. |
+| Email delivery fails | Verify SendGrid credentials, sender identity, permissions, and provider response. |
+| SQLite dependency error | Activate the correct virtual environment and reinstall requirements. |
+| `ModuleNotFoundError` | Confirm the working directory and that all dependencies are installed in the active environment. |
+
+---
+
+## 🔐 Security & Limitations
+
+- Never commit API keys, `.env`, private conversation databases, or generated reports.
+- Rotate any credentials accidentally exposed in source code or logs.
+- Treat external search results and provider links as untrusted data.
+- Display unavailable information rather than inventing prices, ratings, or booking links.
+- Budget figures for food, activities, and local transport are estimates, not confirmed quotes.
+- Verify fares, hotel classifications, cancellation policies, taxes, and availability with the provider before booking.
+- An itinerary is an AI-generated recommendation; independently verify opening hours and travel times.
+- Email provider acceptance does not guarantee inbox delivery.
+- The default SQLite checkpoint setup is intended for local or single-instance use. Add authentication, user isolation, and suitable persistent storage before deploying to multiple users.
+
+---
+
+## 🔮 Future Improvements
+
+Potential extensions include:
+
+- Interactive maps and route optimization.
+- Weather-aware itinerary recommendations.
+- Flight and hotel price monitoring with notifications.
+- Saved trips and user profiles.
+- Group travel planning and shared budgets.
+- Multi-agent planning for flights, hotels, itinerary, and budgeting.
+- Authentication and production-ready persistent storage.
+
+---
+
+## 👨‍💻 Built With
+
+Wanderwise AI combines conversational AI, external travel search, persistent agent state, structured data validation, and document generation to make travel planning more organized and accessible.
+
+**Wanderwise AI — From travel ideas to a structured trip plan.**
