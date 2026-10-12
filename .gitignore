@@ -1,0 +1,12 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.streamlit/
+_init__.py
+
+# Local trip conversation memory and generated reports
+travel_memory.sqlite3
+travel_memory.sqlite3-*
+*.pdf
